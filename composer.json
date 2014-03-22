@@ -1,0 +1,22 @@
+{
+    "name": "goatherd/wp-minify",
+    "description": "Plugin for html minification.",
+    "keywords": ["wordpress", "minify", "html"],
+    "homepage": "https://github.com/goatherd/wp-minify",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maik Penz",
+            "email": "maik@phpkuh.de"
+        }
+    ],
+    "type": "wordpress-plugin",
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+           "Goatherd\\WpPlugin\\": "src/"
+        }
+    }
+}
