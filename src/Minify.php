@@ -104,12 +104,20 @@ class Minify
      */
     protected function vetoMinify()
     {
+        // allow to override by user
+        if (isset($_GET['x-gh-minify'])) {
+            return !$_GET['x-gh-minify'];
+        }
+
         // only minify for index requests
         if (basename($_SERVER['SCRIPT_NAME']) != 'index.php') {
             return true;
         }
 
-        // -TODO add default conditions where minify should be disabled
+        // not when debugging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            return true;
+        }
 
         return false;
     }
