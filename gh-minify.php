@@ -4,7 +4,7 @@ Plugin Name: Goatherd Minify
 Author: Maik Penz
 Plugin URI: https://github.com/goatherd
 Description: Plugin HTML minification
-Version: 1.0
+Version: 1.1
 
 Requires PHP 5.3 or newer
 Requires ob-cache support
