@@ -1,5 +1,5 @@
 {
-    "name": "goatherd/wp-minify",
+    "name": "goatherd/gh-minify",
     "description": "Plugin for html minification.",
     "keywords": ["wordpress", "minify", "html"],
     "homepage": "https://github.com/goatherd/wp-minify",
@@ -20,3 +20,4 @@
         }
     }
 }
+
