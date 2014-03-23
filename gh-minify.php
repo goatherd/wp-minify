@@ -16,4 +16,4 @@ if (!class_exists('Goatherd\WpPlugin\Minify', true)) {
 }
 
 // let's enable the cache
-Goatherd\WpPlugin\Minify::initPlugin();
+Goatherd\WpPlugin\Minify::initWordpress();

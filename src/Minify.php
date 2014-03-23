@@ -10,6 +10,15 @@ namespace Goatherd\WpPlugin;
  * `gh-minify-veto` disables minify for request if not false
  * `gh-minify-content` can post-process minification
  *
+ * Can be used outside wordpress context if autoloaded through composer.
+ * For example prepend this code snippet to index.php:
+ * 
+ * <?php
+ * require_once __DIR__ . '/vendor/autoload.php'; // composer
+ * Goatherd\WpPlugin\Minify::initPlugin(); // enable minify
+ * 
+ * That will wrap output and enable minification. Once WordPress is loaded it
+ * will enable hooks.
  */
 class Minify
 {
@@ -18,7 +27,13 @@ class Minify
 
     // internal
     private static $_instance;
-    
+
+    /**
+     *
+     * @var boolean
+     */
+    private static $wordpressEnabled = false;
+
     /**
      * Singleton init for wordpress.
      *
@@ -33,6 +48,20 @@ class Minify
         }
 
         return self::$_instance;
+    }
+
+    /**
+     * WordPress integration.
+     *
+     * @return self
+     */
+    public static function initWordpress()
+    {
+        $instance = static::initPlugin();
+
+        if (!static::$wordpressEnabled) {
+            static::$wordpressEnabled = true;
+        }
     }
 
     /**
@@ -59,15 +88,17 @@ class Minify
         if ($this->doMinify) {
             /* Ignore this html tags */
             $ignore_tags = array('textarea', 'pre', 'code');
-            $ignore_tags = (array) apply_filters('gh-minify-skip-tags', $ignore_tags);
-    
+            if (static::$wordpressEnabled) {
+                $ignore_tags = (array) apply_filters('gh-minify-skip-tags', $ignore_tags);
+            }
+
             // convert to string
             if ( $ignore_tags ) {
                 $ignore_regex = implode('#', $ignore_tags);
                 $ignore_regex = preg_quote($ignore_regex, '`');
                 $ignore_regex = str_replace('#', '|', $ignore_regex);
             }
-    
+
             /* Minify */
             $cleaned = preg_replace(
                 array(
@@ -80,20 +111,22 @@ class Minify
                 ),
                 (string) $content
             );
-    
+
             // only use minified content if not failed
             if ( strlen($cleaned) > 1 ) {
                 $content = $cleaned;
                 unset($cleaned);
             }
         }
-    
+
         // allow to futher adjust/ override minification
-        $cleaned = apply_filters('gh-minify-content', $content);
-        if ( strlen($cleaned) > 1 ) {
-            $content = $cleaned;
+        if (static::$wordpressEnabled) {
+            $cleaned = apply_filters('gh-minify-content', $content);
+            if ( strlen($cleaned) > 1 ) {
+                $content = $cleaned;
+            }
         }
-    
+
         return $content;
     }
 
@@ -133,7 +166,12 @@ class Minify
      */
     public function obCallback($content)
     {
-        if (apply_filters('gh-minify-veto', $this->vetoMinify())) {
+        $veto = $this->vetoMinify();
+        if (static::$wordpressEnabled) {
+            $veto = apply_filters('gh-minify-veto', $veto);
+        }
+
+        if ($veto) {
             return $content;
         }
 
