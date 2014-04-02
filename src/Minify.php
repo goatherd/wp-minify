@@ -32,7 +32,7 @@ class Minify
      *
      * @var boolean
      */
-    private static $wordpressEnabled = false;
+     static $wordpressEnabled = false;
 
     /**
      * Singleton init for wordpress.
@@ -59,8 +59,8 @@ class Minify
     {
         $instance = static::initPlugin();
 
-        if (!static::$wordpressEnabled) {
-            static::$wordpressEnabled = true;
+        if (!self::$wordpressEnabled) {
+            self::$wordpressEnabled = true;
         }
     }
 
@@ -70,6 +70,16 @@ class Minify
     public function initInstance()
     {
         ob_start(array($this, 'obCallback'));
+    }
+
+
+    /**
+     *
+     * @return boolean
+     */
+    public function isWordpressEnabled()
+    {
+        return self::$wordpressEnabled;
     }
 
     /**
@@ -87,7 +97,7 @@ class Minify
         // additional check to allow for conditional bypassing later on (especially provide placeholder for backend configuration)
         if ($this->doMinify) {
             /* Ignore this html tags */
-            $ignore_tags = array('textarea', 'pre', 'code');
+            $ignore_tags = array('textarea', 'pre', 'code', 'script');
             if (static::$wordpressEnabled) {
                 $ignore_tags = (array) apply_filters('gh-minify-skip-tags', $ignore_tags);
             }
@@ -149,6 +159,11 @@ class Minify
 
         // not when debugging
         if (defined('WP_DEBUG') && WP_DEBUG) {
+            return true;
+        }
+
+        // plugin inactive or wordpress failed to load
+        if (!$this->isWordpressEnabled()) {
             return true;
         }
 
