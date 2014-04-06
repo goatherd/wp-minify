@@ -3,7 +3,7 @@
     "description": "Plugin for html minification.",
     "keywords": ["wordpress", "minify", "html"],
     "homepage": "https://github.com/goatherd/wp-minify",
-    "license": "MIT",
+    "license": "BSD-3-Clause",
     "authors": [
         {
             "name": "Maik Penz",

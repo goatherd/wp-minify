@@ -2,6 +2,8 @@
 
 namespace Goatherd\WpPlugin;
 
+use Goatherd\WpPlugin\Minify\MinifyInterface;
+
 /**
  * Request minification.
  *
@@ -22,8 +24,14 @@ namespace Goatherd\WpPlugin;
  */
 class Minify
 {
-    // -TODO make option
-    protected $doMinify = true;
+    /**
+     * 
+     * @var MinifyInterface
+     */
+    protected $minify;
+
+    // TODO make option
+    protected $minifyClass = 'Goatherd\WpPlugin\Minify\HtmlMinify';
 
     // internal
     private static $_instance;
@@ -70,8 +78,26 @@ class Minify
     public function initInstance()
     {
         ob_start(array($this, 'obCallback'));
+        $this->setMinify(new $this->minifyClass());
     }
 
+    /**
+     * 
+     * @param MinifyInterface $minify
+     */
+    public function setMinify(MinifyInterface $minify)
+    {
+        $this->minify = $minify;
+    }
+
+    /**
+     * 
+     * @return \Goatherd\WpPlugin\Minify\MinifyInterface
+     */
+    public function getMinify()
+    {
+        return $this->minify;
+    }
 
     /**
      *
@@ -95,38 +121,8 @@ class Minify
     public function minifyContent($content)
     {
         // additional check to allow for conditional bypassing later on (especially provide placeholder for backend configuration)
-        if ($this->doMinify) {
-            /* Ignore this html tags */
-            $ignore_tags = array('textarea', 'pre', 'code', 'script');
-            if (static::$wordpressEnabled) {
-                $ignore_tags = (array) apply_filters('gh-minify-skip-tags', $ignore_tags);
-            }
-
-            // convert to string
-            if ( $ignore_tags ) {
-                $ignore_regex = implode('#', $ignore_tags);
-                $ignore_regex = preg_quote($ignore_regex, '`');
-                $ignore_regex = str_replace('#', '|', $ignore_regex);
-            }
-
-            /* Minify */
-            $cleaned = preg_replace(
-                array(
-                    '/<!--[^\[><](.*?)-->/s',
-                    '#(?ix)(?>[^\S ]\s*|\s{2,})(?=(?:(?:[^<]++|<(?!/?(?:' .$ignore_regex. ')\b))*+)(?:<(?>' .$ignore_regex. ')\b|\z))#'
-                ),
-                array(
-                    '',
-                    ' '
-                ),
-                (string) $content
-            );
-
-            // only use minified content if not failed
-            if ( strlen($cleaned) > 1 ) {
-                $content = $cleaned;
-                unset($cleaned);
-            }
+        if (isset($this->minify)) {
+            $content = $this->minify->minify($content);
         }
 
         // allow to futher adjust/ override minification
