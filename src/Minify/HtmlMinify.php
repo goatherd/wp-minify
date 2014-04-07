@@ -90,35 +90,35 @@ class HtmlMinify implements MinifyInterface
         // replace SCRIPTs (and minify) with placeholders
         $html = preg_replace_callback(
             '/(\\s*)<script(\\b[^>]*?>)([\\s\\S]*?)<\\/script>(\\s*)/ui',
-            array($this, '_removeScriptCB'),
+            array($this, 'removeScript'),
             $html
         );
 
         // replace STYLEs (and minify) with placeholders
         $html = preg_replace_callback(
             '/\\s*<style(\\b[^>]*>)([\\s\\S]*?)<\\/style>\\s*/ui',
-            array($this, '_removeStyleCB'),
+            array($this, 'removeStyle'),
             $html
         );
 
         // remove HTML comments (not containing IE conditional comments).
         $html = preg_replace_callback(
             '/<!--([\\s\\S]*?)-->/',
-            array($this, '_commentCB'),
+            array($this, 'removeComment'),
             $html
         );
 
         // replace PREs with placeholders
         $html = preg_replace_callback(
             '/\\s*<pre(\\b[^>]*?>[\\s\\S]*?<\\/pre>)\\s*/ui',
-            array($this, '_removePreCB'),
+            array($this, 'removePre'),
             $html
         );
 
         // replace TEXTAREAs with placeholders
         $html = preg_replace_callback(
             '/\\s*<textarea(\\b[^>]*?>[\\s\\S]*?<\\/textarea>)\\s*/ui',
-            array($this, '_removeTextareaCB'),
+            array($this, 'removeTextarea'),
             $html
         );
 
@@ -162,7 +162,7 @@ class HtmlMinify implements MinifyInterface
         return $html;
     }
 
-    protected function commentCB($m)
+    protected function removeComment($m)
     {
         return (0 === strpos($m[1], '[') || false !== strpos($m[1], '<![')) ? $m[0] : '';
     }
@@ -175,17 +175,17 @@ class HtmlMinify implements MinifyInterface
         return $placeholder;
     }
 
-    protected function removePreCB($m)
+    protected function removePre($m)
     {
         return $this->reservePlace("<pre{$m[1]}");
     }
 
-    protected function removeTextareaCB($m)
+    protected function removeTextarea($m)
     {
         return $this->reservePlace("<textarea{$m[1]}");
     }
 
-    protected function removeStyleCB($m)
+    protected function removeStyle($m)
     {
         $openStyle = "<style{$m[1]}";
         $css = $m[2];
@@ -206,7 +206,7 @@ class HtmlMinify implements MinifyInterface
         );
     }
 
-    protected function removeScriptCB($m)
+    protected function removeScript($m)
     {
         $openScript = "<script{$m[2]}";
         $js = $m[3];
